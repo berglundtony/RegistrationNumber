@@ -1,0 +1,330 @@
+﻿@{
+    ViewBag.Title = "RegisteredCars";
+}
+<h2>Vehicle register</h2>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+            <table class="activecars" id="ActiveCars">
+            </table>
+            <div class="row">
+                <input id="new-car-btn" type="button" class="btn btn-sm btn-default" value="Add" />
+                <input id="clear-active" type="reset" class="btn btn-sm btn-default pull-right" value="Clear" />
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+            <center>
+                <ul class="move-button vertical-align-middle">
+                    <li>
+                        <a href="#toinactive" class="btn btn-info btn-md" id="movetoinactive">
+                            <span class="glyphicon glyphicon-chevron-right"></span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#toactive" class="btn btn-info btn-md" id="movetoactive">
+                            <span class="glyphicon glyphicon-chevron-left"></span>
+                        </a>
+                    </li>
+                </ul>
+            </center>
+        </div>
+        <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+            <table class="inactivecars" id="InactiveCars">
+            </table>
+            <div class="row">
+                <input id="new-old-car-btn" type="button" class="btn btn-sm btn-default" value="Add" />
+                <input id="clear-inactive" type="reset" class="btn pull-right btn-sm btn-default" value="Clear" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+                <form id="add-cars-form">
+                    <div class="form-group">
+                        <label class="form-check-label" for="regnumber">Registration number</label>
+                        <input type="text" class="form-control" id="regnumber" name="registry_number" />
+                        <span id="registrationnumber"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-check-label" for="carcheck">Car model</label>
+                        <input type="text" class="form-control" id="carmodel" name="model" />
+                        <span id="car-model"></span>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="status" id="statuscheck" />
+                        <label class="form-check-label" for="carcheck">Status</label>
+                    </div>
+                    <div class="input-group-btn">
+                        <input type="button" id="add-new-car-btn" class="btn btn-sm btn-default btn" value="Send" />
+                        <input type="button" id="close-btn" class="btn pull-right btn-sm btn-default btn" value="Close" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $("#hide").show();
+        $("#new-car-btn").show();
+        $("#add-cars-form").hide();
+        GetCarsForTable();
+
+        /* Validation add-cars-form */
+
+        jQuery.extend(jQuery.validator.messages, {
+            maxlength: jQuery.validator.format("It will be not more than {0} characters."),
+            minlength: jQuery.validator.format("It will be {0} characters."),
+            rangelength: jQuery.validator.format("your message between {0} and {1} characters."),
+        });
+
+        $.validator.addMethod(
+            "regex",
+            function (value, element, regexp) {
+                if (regexp.constructor != RegExp)
+                    regexp = new RegExp(regexp);
+                else if (regexp.global)
+                    regexp.lastIndex = 0;
+                return this.optional(element) || regexp.test(value);
+            }, "Error regular expression"
+        );
+    });
+
+    $("#add-cars-form").validate({
+        rules: {
+            "registry_number": {
+                "required": true,
+                "minlength": 6,
+                "maxlength": 6,
+                "regex": /^[0-9a-zA-Z]+$/,
+            },
+            "model": {
+                "required": true,
+                "maxlength": 50,
+            }
+        },
+    });
+
+    function validateForm(node) {
+        $(".error-reg").hide();
+        $(".error-model").hide();
+        var regnumber = $("#regnumber").val();
+        var carmodel = $("#carmodel").val();
+        if (regnumber === "") {
+            $(".error-reg").hide();
+            $(".error-model").hide();
+            $("#regnumber").after('<span class="error-reg">Registration number is required</span>');
+            if (carmodel === "") {
+                $("#carmodel").after('<span class="error-model">Car model is required</span>');
+            }
+            return false;
+        }
+        if (carmodel === "") {
+            $(".error-reg").hide();
+            $(".error-model").hide();
+            $("#carmodel").after('<span class="error-model">Car model is required</span>');
+            if (regnumber === "") {
+                $("#regnumber").after('<span class="error-reg">Registration number is required</span>');
+            }
+            return false;
+        }
+
+        if ((regnumber.length < 6) || (regnumber.length > 6)) {
+            $(".error-reg").hide();
+            $(".error-model").hide();
+            $("#regnumber").after('<span class="error-reg">Registration number will be 6 characters !</span>');
+            return false;
+        }
+
+        $("#regnumber").on("focus", function () {
+            if ($(node).attr('aria-invalid', false)) {
+                $(".error-reg").hide();
+            }
+        });
+
+        $("#carmodel").on("focus", function () {
+            if ($(node).attr('aria-invalid', false)) {
+                $(".error-model").hide();
+            }
+        });
+
+        // regular expression to match only alphanumeric characters and spaces
+        var re = /^[0-9a-zA-Z]+$/;
+
+        // validation fails if the input doesn't match our regular expression
+        if (!re.test(regnumber)) {
+            $(".error-reg").hide();
+            $(".error-model").hide();
+            $("#regnumber").after('<span class="error-reg">Registration number contains invalid characters!</span>');
+            return false;
+        }
+
+        // validation was successful
+        return true;
+    }
+    /* The form sending input information to the web API */
+
+    $("#add-new-car-btn").on("click", function () {
+        $("#new-car-btn").show();
+
+        var regnumber = $("#regnumber").val();
+        var model = $("#carmodel").val();
+        var status = $('input[name=status]').prop('checked');
+
+
+        if (validateForm()) {
+            var datastring = { 'RegNumbers': regnumber, 'Model': model, 'Status': status }
+            $.ajax({
+                url: '/api/DataHandling',
+                type: 'POST',
+                dataType: 'json',
+                data: datastring,
+                success: function (data, textStatus, xhr) {
+                    console.log(data);
+                    GetCarsForTable();
+                    $("#add-cars-form").hide();
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    console.log('Error in Operation');
+                }
+            });
+        } else {
+            return false;
+        }
+    });
+
+
+    /* Make a selection of the chosen car in the table row */
+
+
+    $("#ActiveCars").on('click', 'tr', function (event) {
+        $(this).addClass('selected').siblings().removeClass('selected');
+        $("#InActiveCars tr").removeClass('selected');
+        selected_car_id = $(this).closest("tr.selected").find('input[name="item.ID"]').val();
+        selected_car_status = $(this).closest("tr.selected").find('input[name="item.Status"]').val();
+        console.log("id: " + selected_car_id + " status: " + selected_car_status);
+    });
+
+    $("#InactiveCars").on('click', 'tr', function (event) {
+        $(this).addClass('selected').siblings().removeClass('selected');
+        $("#ActiveCars tr").removeClass('selected');
+        selected_car_id = $(this).closest("tr.selected").find('input[name="item.ID"]').val();
+        selected_car_status = $(this).closest("tr.selected").find('input[name="item.Status"]').val();
+        console.log("id: " + selected_car_id + " status: " + selected_car_status);
+    });
+
+    /* The arrows to move the cars */
+    var selected_car_id = 0;
+
+    $('#movetoactive').on("click", function () {
+            MoveToOther(false);
+    });
+
+    $('#movetoinactive').on("click", function () {
+            MoveToOther(true);
+    });
+
+
+    function MoveToOther(status) {
+        $.ajax({
+            url: '/api/DataHandling',
+            type: 'Put',
+            dataType: 'json',
+            data: { 'Id': selected_car_id, 'Status': status },
+            success: function (data, textStatus, xhr) {
+                console.log(data);
+                GetCarsForTable();
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                console.log('Error in Operation');
+            }
+        });
+    }
+
+    function GetCarsForTable() {
+        $.ajax({
+            url: '/api/DataHandling',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data, textStatus, xhr) {
+                console.log(data);
+                $("#ActiveCars").empty();
+                $("#InactiveCars").empty();
+                $("#ActiveCars").html($("#ActiveCars").html() + GetTableHeader());
+                $("#InactiveCars").html($("#InactiveCars").html() + GetTableHeader());
+                $.each(data, function (i, v) {
+                    if (v.Status == true) {
+                        $("#ActiveCars").html($("#ActiveCars").html() + GetTableInfo(v.ID, v.Status, v.RegNumbers, v.Model))
+                    } else {
+                        $("#InactiveCars").html($("#InactiveCars").html() + GetTableInfo(v.ID, v.Status, v.RegNumbers, v.Model));
+                    }
+                }, 'json')
+                $("#add-cars-form").trigger("reset");
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                console.log('Error in Operation');
+            }
+        });
+    };
+
+    function GetTableHeader() {
+        return '<tr><th><label>Registration number</label></th><th><label>Car model</label></th></tr>';
+    }
+
+    function GetTableInfo(id, status, regnumber, model) {
+        return '<tr><input id="item_ID" name="item.ID" type="hidden" value="'
+            + id + '"/><td>' + regnumber + '</td><td>' + model + '</td><td></tr>';
+    }
+
+    $("#new-car-btn").on("click", function () {
+        $("#add-cars-form").show().parent().removeClass("col-md-offset-8 col-lg-offset-8");
+        $("#add-cars-form").trigger("reset");
+        $("#statuscheck").prop('checked', true);
+    });
+
+    $("#new-old-car-btn").on("click", function () {
+        $("#add-cars-form").show().parent().addClass("col-md-offset-8 col-lg-offset-8");
+        $("#add-cars-form").trigger("reset");
+        $("#statuscheck").prop('checked', false);
+    });
+
+    $("#close-btn").on("click", function () {
+        $("#add-cars-form").hide();
+    });
+
+    $("#clear-active").on("click", function () {
+        $("#add-cars-form").trigger("reset");
+        $("#ActiveCars tr").empty();
+        $.ajax({
+            url: '/api/DataHandling',
+            type: 'Delete',
+            dataType: 'json',
+            data: { 'Status': true },
+            success: function (data, textStatus, xhr) {
+                console.log(data);
+                GetCarsForTable();
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                console.log('Error in Operation');
+            }
+        });
+    });
+
+    $("#clear-inactive").on("click", function () {
+        $("#add-cars-form").trigger("reset");
+        $("#InactiveCars tr").empty();
+        $.ajax({
+            url: '/api/DataHandling',
+            type: 'Delete',
+            dataType: 'json',
+            data: { 'Status': false },
+            success: function (data, textStatus, xhr) {
+                console.log(data);
+                GetCarsForTable();
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                console.log('Error in Operation');
+            }
+        });
+    });
+
+</script>

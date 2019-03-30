@@ -1,0 +1,61 @@
+﻿body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Override the default bootstrap behavior where horizontal description lists 
+   will truncate terms that are too long to fit in the left column 
+*/
+.dl-horizontal dt {
+    white-space: normal;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+
+.inactivecars, .activecars{
+    width:100%;
+}
+
+table td {
+    padding: 10px 0 10px 5px;
+    border-bottom: 5px #ccc;
+    /* default is vertical-align: middle; */
+}
+
+tr.selected td {
+    background-color: #ccc;
+}
+
+#new-car-btn, #new-old-car-btn, #clear-active, #clear-inactive, #add-cars-form {
+    margin-top: 20px;
+}
+
+ul.move-button {
+    list-style-type: none;
+    line-height: 1.5;
+}
+ul.move-button li {
+    padding: 10px 10px;
+}
+#add-cars-form {
+    background: #ccc;
+    padding: 1.5rem;
+}
+
+.error-reg, .error-model {
+    color: red;
+    margin-top: 5px;
+    font-weight: 400;
+    display: block;
+}
