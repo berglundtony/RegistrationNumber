@@ -13,16 +13,16 @@ GO
 4. Execute the sqript
 
 If you want to use the backup file instead
-1. a) Use the database file HouseRentalService.bak to create the database in SQL Server 2014.
+1. a) Use the database file RegistrationNumbers.bak to create the database in SQL Server 2014.
    b) Right-click Databases and select Restore Database ... etc ...
 2. Change the webconfig to fit your machine.
 3a. Here is my webconfig that is customized for SQL Server 2014
-  <Connection strings>
-    <add name = "HouseRentalServiceEntities" connectionString = "metadata = res: //*/HouseRentalDbContext.csdl | res: //*/HouseRentalDbContext.ssdl | res: //*/HouseRentalDbContext.msl; provider = System.Data.SqlClient; provider connection string = & quot; data source = .; initial catalog = HouseRentalService; integrated security = True; MultipleActiveResultSets = True; App = EntityFramework & quot; " providerName = "System.Data.EntityClient" />
-  </ Connection strings>
-3b. If you run SQL Server Express then the data source =. \ T or the name of the database eg. Computer / SQLEXPRESS (see below)
-  <Connection strings>
-    <add name = "HouseRentalServiceEntities" connectionString = "metadata = res: //*/HouseRentalDbContext.csdl | res: //*/HouseRentalDbContext.ssdl | res: //*/HouseRentalDbContext.msl; provider = System.Data.SqlClient; provider connection string = & quot; data source = .subscript = True; MultipleActiveResultSets = True; App = EntityFramework & quot; providerName = "System.Data.EntityClient" />
-  </ Connection strings>
+  <connectionStrings>
+    <add name="RegistrationNumbersEntities" connectionString="metadata=res://*/RegistrationNumbersModel.csdl|res://*/RegistrationNumbersModel.ssdl|res://*/RegistrationNumbersModel.msl;provider=System.Data.SqlClient;provider connection string=&quot;data source=.;initial catalog=RegistrationNumbers;integrated security=True;MultipleActiveResultSets=True;App=EntityFramework&quot;" providerName="System.Data.EntityClient" />
+  </connectionStrings>
+3b. If you run SQL Server Express then the data source =.\SQLEXPRESS  or the name of the database eg. Computer\SQLEXPRESS (see below)
+  <connectionStrings>
+    <add name="RegistrationNumbersEntities" connectionString="metadata=res://*/RegistrationNumbersModel.csdl|res://*/RegistrationNumbersModel.ssdl|res://*/RegistrationNumbersModel.msl;provider=System.Data.SqlClient;provider connection string=&quot;data source=.;initial catalog=RegistrationNumbers;integrated security=True;MultipleActiveResultSets=True;App=EntityFramework&quot;" providerName="System.Data.EntityClient" />
+  </connectionStrings>
 4. Then just run the project.
 
